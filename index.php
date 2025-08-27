@@ -9,4 +9,6 @@
     <?php }
 ?>
 
+<p>type: <?php echo esc_html ( get_field('type') ); ?></p>
+
 <p>Footer</p>
