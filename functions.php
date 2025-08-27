@@ -231,3 +231,56 @@ add_action( 'acf/include_fields', function() {
 ) );
 } );
 
+// Create demo pages on theme activation
+add_action('after_switch_theme', 'mytheme_create_demo_pages');
+
+function mytheme_create_demo_pages() {
+    if (get_option('mytheme_demo_pages_created')) return;
+
+    // Define demo pages
+    $pages = [
+        [
+            'title'   => 'About',
+            'content' => '<p>This is the About page. Here you can write a short introduction about yourself or your business.</p>',
+            'slug'    => 'about'
+        ],
+        [
+            'title'   => 'Portfolio',
+            'content' => '<p>This is the Portfolio page. It will showcase your projects.</p>',
+            'slug'    => 'portfolio'
+        ],
+    ];
+
+    $about_page_id = null;
+
+    foreach ($pages as $page) {
+        // Check if page already exists (by slug)
+        $existing = get_page_by_path($page['slug']);
+        if (!$existing) {
+            $post_id = wp_insert_post([
+                'post_title'   => $page['title'],
+                'post_name'    => $page['slug'], // slug
+                'post_content' => $page['content'],
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+                'post_author'  => 1,
+            ]);
+
+            if ($page['slug'] === 'about') {
+                $about_page_id = $post_id;
+            }
+                } else {
+            if ($page['slug'] === 'about') {
+                $about_page_id = $existing->ID;
+            }
+        }
+    }
+
+    // Set "About" page as front page
+    if ($about_page_id) {
+        update_option('show_on_front', 'page');
+        update_option('page_on_front', $about_page_id);
+    }
+
+    update_option('mytheme_demo_pages_created', true);
+}
